@@ -2,7 +2,7 @@
 
 
 
-The Stochastic WaveNet code of the paper [Stochastic WaveNet: A Generative Latent Variable Model for Sequential Data](Stochastic WaveNet: A Generative Latent Variable Model for Sequential Data). The dataset preprocessing is following the repo [Zforcing](https://github.com/sordonia/zforcing) and [VRNN](https://github.com/jych/nips2015_vrnn). 
+The Stochastic WaveNet code of the paper [Stochastic WaveNet: A Generative Latent Variable Model for Sequential Data](https://arxiv.org/abs/1806.06116). The dataset preprocessing is following the repo [Zforcing](https://github.com/sordonia/zforcing) and [VRNN](https://github.com/jych/nips2015_vrnn). 
 
 
 
