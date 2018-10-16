@@ -14,6 +14,7 @@ Timit: https://catalog.ldc.upenn.edu/ldc93s1
 
 IAMOn-DB: http://www.fki.inf.unibe.ch/databases/iam-on-line-handwriting-database
 
+The code is run by Python3 and pytorch 0.3.0
 
 
 
