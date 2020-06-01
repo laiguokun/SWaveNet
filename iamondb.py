@@ -1,9 +1,11 @@
+import warnings
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal
 import theano.tensor as T
 
+from numpy.lib.stride_tricks import as_strided
 from iamondb_utils import fetch_iamondb
 
 def tolist(arg):
@@ -502,7 +504,7 @@ class IAMOnDB(TemporalSeries, SequentialPrepMixin):
 
         if self.prep == 'normalize':
             X = new_x
-            print X[0].shape
+            print(X[0].shape)
         elif self.prep == 'standardize':
             X, self.X_max, self.X_min = self.standardize(raw_X)
 
@@ -567,7 +569,7 @@ if __name__ == "__main__":
         min_x = np.min(item[:,1])
         min_y = np.min(item[:,2])
 
-    print np.max(max_x)
-    print np.max(max_y)
-    print np.min(min_x)
-    print np.min(min_y)
+    print((np.max(max_x)))
+    print((np.max(max_y)))
+    print((np.min(min_x)))
+    print((np.min(min_y)))
