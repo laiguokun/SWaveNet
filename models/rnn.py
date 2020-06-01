@@ -1,8 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from Regressor import Regressor
-from utils import *;
+
+from models.Regressor import Regressor
+from models.utils import LogLikelihood
+
 
 class Model(nn.Module):
     def __init__(self, input_dim, embed_dim, output_dim, data=None):

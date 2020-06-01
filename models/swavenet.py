@@ -1,8 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from Regressor import Regressor
-from utils import *;
+from torch.autograd import Variable
+
+from models.Regressor import Regressor
+from models.utils import gaussian_kld, LogLikelihood
 
 
 class WaveNetGate(nn.Module):
@@ -37,7 +39,7 @@ class WaveNetGate(nn.Module):
             tanh_x = self.filter_conv_bn(tanh_x); 
             if self.residual_link:
                 residual_x = self.residual_bn(residual_x);
-        sigomid_x = F.sigmoid(sigmoid_x);
+        sigmoid_x = F.sigmoid(sigmoid_x);
         tanh_x = F.tanh(tanh_x);
         x = tanh_x * sigmoid_x;
         #print(x.size(), residual_x.size());
@@ -205,7 +207,9 @@ class Model(nn.Module):
             
             #compute KL(q||p)
             tmp = gaussian_kld([mu, theta], [z_mu, z_theta]);
+            # print (tmp.shape, mask.shape)
             tmp = tmp.permute(2,0,1);
+            # print (tmp.shape)
             tmp = (tmp.sum(-1) * mask).sum(0);
             tmp = tmp.mean();
             kld_loss += tmp;

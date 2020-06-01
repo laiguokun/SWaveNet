@@ -56,7 +56,7 @@ class WaveNetGate(nn.Module):
             tanh_x = self.filter_conv_bn(tanh_x); 
             if self.residual_link:
                 residual_x = self.residual_bn(residual_x);
-        sigomid_x = F.sigmoid(sigmoid_x);
+        sigmoid_x = F.sigmoid(sigmoid_x);
         tanh_x = F.tanh(tanh_x);
         x = tanh_x * sigmoid_x;
         if (self.residual_link):
