@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.random as npr
-from scipy.io import loadmat
+# from scipy.io import loadmat
 import os
 import json
 from collections import defaultdict, OrderedDict
@@ -162,7 +162,6 @@ class IAMOnDBIterator(object):
             #print(x_batch.shape);
             mask_batch = mask_batch[1:];
             yield x_batch, y_batch, mask_batch
-from motion_utils import read_bvh
 
 class DanceIterator(object):
     def __init__(self, dance_folder, fnames, seq_len, is_test = False, X_mean = None, X_std = None, ab = False):
@@ -191,6 +190,7 @@ class DanceIterator(object):
         return dances    
     
     def batchify_(self, dances, is_test=False, mean = None, std = None):
+        from motion_utils import read_bvh
         seq_len = self.seq_len;
         dance_batch=[];
         mask_batch = []

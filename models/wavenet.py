@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from Regressor import Regressor
-from utils import *;
+
+from models.Regressor import Regressor
+from models.utils import LogLikelihood
 
 
 class Model(nn.Module):
@@ -77,7 +78,7 @@ class Model(nn.Module):
                 tanh_x = self.filter_conv_bns[i](tanh_x); 
                 residual_x = self.residual_bns[i](residual_x);
                 
-            sigomid_x = F.sigmoid(sigmoid_x);
+            sigmoid_x = F.sigmoid(sigmoid_x);
             tanh_x = F.tanh(tanh_x);
             
             x = tanh_x * sigmoid_x;

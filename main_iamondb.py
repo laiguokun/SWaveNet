@@ -7,7 +7,7 @@ import numpy as np
 import os
 import random
 import load
-from models import swavenet_hw
+from models import swavenet_hw, swavenet
 import math;
 from iamondb import IAMOnDB
 
@@ -31,21 +31,22 @@ def evaluate(dataset, model, args, split='valid'):
     loss_sum = 0
     cnt = 0;
     for x, y, x_mask in dataset:
-        try:
-            x = Variable(torch.from_numpy(x), volatile=True).float().cuda()
-            y = Variable(torch.from_numpy(y), volatile=True).float().cuda()
-            x_mask = Variable(torch.from_numpy(x_mask), volatile=True).float().cuda()
+        # try:
+        with torch.no_grad():
+            x = Variable(torch.from_numpy(x)).float().cuda()
+            y = Variable(torch.from_numpy(y)).float().cuda()
+            x_mask = Variable(torch.from_numpy(x_mask)).float().cuda()
             if (args.kld == 'True'):
                 loss, kld_loss = model([x,y,x_mask]);
                 total_loss = loss - kld_loss;
-                total_loss = total_loss.data[0];
+                total_loss = total_loss.item()
             else:
                 all_loss = model([x,y,x_mask]);
-                total_loss = all_loss.data[0]
+                total_loss = all_loss.item()
             loss_sum += total_loss;
             cnt += 1;
-        except:
-            print('exception');
+            # except:
+            #     print('exception')
     return -loss_sum/cnt;
 
 
@@ -59,7 +60,7 @@ parser.add_argument('--end_lr', type=float, default=0.)
 parser.add_argument('--kld', type=str, default='True')
 parser.add_argument('--model_name', type=str, default='swavenet_hw')
 parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--gpu', type=int, default=None)
+parser.add_argument('--gpu', type=int, default=0)
 parser.add_argument('--embed_size', type=int, default=200)
 parser.add_argument('--z_size', type=int, default=200)
 
@@ -110,7 +111,8 @@ print('Done.')
 if args.model_name[:10] == 'wavenetvae':
     model = eval(args.model_name).Model(input_dim=3, embed_dim=args.embed_size, z_dim=args.z_size, data=None)
 else:
-    model = eval(args.model_name).Model(input_dim=3, embed_dim=256, output_dim=256, data=None)
+    # model = eval(args.model_name).Model(input_dim=3, embed_dim=256, output_size=256, data=None)
+    model = eval(args.model_name).Model(input_dim=3, embed_dim=args.embed_size, z_dim=args.z_size, data=None)
 model.cuda()
 
 opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-5, eps=1e-5)
@@ -133,35 +135,35 @@ for epoch in range(num_epochs):
     model.train()
     print('Epoch {}: ({})'.format(epoch, model_id.upper()))
     for x, y, x_mask in train_data:
-        try:
-            opt.zero_grad()
-            x = Variable(torch.from_numpy(x)).float().cuda()
-            y = Variable(torch.from_numpy(y)).float().cuda()
-            x_mask = Variable(torch.from_numpy(x_mask)).float().cuda()
-            if (args.kld == 'True'):
-                loss, kld_loss = model([x,y,x_mask]);
-                total_loss = loss - kld_loss * kld_weight;
-                if np.isnan(total_loss.data[0]) or np.isinf(total_loss.data[0]):
-                    print("NaN")  # Useful to see if training is stuck.
-                    continue
-                total_loss.backward();
-                total_loss = total_loss.data[0];
-                kld_loss_sum += kld_loss.data[0];
-                logp_loss_sum += loss.data[0];
-            else:
-                all_loss = model([x,y,x_mask]);
-                if np.isnan(all_loss.data[0]) or np.isinf(all_loss.data[0]):
-                    print('NaN');
-                    continue
-                all_loss.backward()
-                total_loss = all_loss.data[0]
+        # try:
+        opt.zero_grad()
+        x = Variable(torch.from_numpy(x)).float().cuda()
+        y = Variable(torch.from_numpy(y)).float().cuda()
+        x_mask = Variable(torch.from_numpy(x_mask)).float().cuda()
+        if (args.kld == 'True'):
+            loss, kld_loss = model([x,y,x_mask]);
+            total_loss = loss - kld_loss * kld_weight;
+            if np.isnan(total_loss.item()) or np.isinf(total_loss.item()):
+                print("NaN")  # Useful to see if training is stuck.
+                continue
+            total_loss.backward();
+            total_loss = total_loss.item()
+            kld_loss_sum += kld_loss.item()
+            logp_loss_sum += loss.item()
+        else:
+            all_loss = model([x,y,x_mask]);
+            if np.isnan(all_loss.item()) or np.isinf(all_loss.item()):
+                print('NaN');
+                continue
+            all_loss.backward()
+            total_loss = all_loss.item()
 
-            torch.nn.utils.clip_grad_norm(model.parameters(), 0.1, 'inf')
-            opt.step()
-            loss_sum += total_loss;
-            step += 1;
-        except:
-            print('exception')
+        torch.nn.utils.clip_grad_norm(model.parameters(), 0.1, 'inf')
+        opt.step()
+        loss_sum += total_loss;
+        step += 1;
+        # except:
+        #     print('exception')
         
     s = timeit.default_timer()
     log_line = 'total time: [%f], epoch: [%d/%d], step: [%d/%d], loss: %f, logp_loss:%f, kld_loss: %f, actual_loss:%f' % (
